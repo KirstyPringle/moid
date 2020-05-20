@@ -34,7 +34,7 @@ def bib():
     document <= canvas # this brython operator writes the canvas to the base document
     
     """ Cant work out how to load image into canvas with brython so drop into javascript here   """
-    window.loadImage('canvas','img/traffic.png',bottomright[0],bottomright[1]) # keep these same as canvas dimensions
+    window.loadImage('canvas','traffic.png',bottomright[0],bottomright[1]) # keep these same as canvas dimensions
     for name,(topleft,bottomright,tooltip) in highlight.items(): 
         """ Create the individual highlight areas """
         c2 = CANVAS(id=name,width=bottomright[0]-topleft[0],height=bottomright[1]-topleft[1])
