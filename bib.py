@@ -41,7 +41,7 @@ def bib():
         c2.style={"position": "absolute", "left": str(topleft[0]+canvasXY[0])+"px", "top": str(topleft[1]+canvasXY[1])+"px" }
         ct2 = canvas.getContext('2d')
         document <= c2
-        tooltip=DIV("This is a "+name,id="t"+name,Class="tooltiptext")
+        tooltip=DIV(SPAN("This is a "+name,id="popup"+name,Class="tooltiptext"),Class="tooltiptext")
         tooltip.style={"position": "absolute", "left": str((topleft[0]+bottomright[0])/2+canvasXY[0])+"px", "top": str((topleft[1]+bottomright[1])/2+canvasXY[1])+"px","zIndex": 1,'visibility': 'hidden' }
         document <= tooltip
         
@@ -57,8 +57,18 @@ def bib():
     
     """ Bind the mouse events to the individual highlight areas """
     for elt_id in highlight.keys():
-        document[elt_id].bind('mouseenter', mouseenter)
-        document[elt_id].bind('mouseleave', mouseleave)
+        document[elt_id].bind('mouseenter', mouseover)
+        document[elt_id].bind('mouseout', mouseout)
+        """ 
+        These sample popups overlap the highlight triggers. This causes jitter.
+        Have added the extra binding for when the mouse leaves the popup. 
+        The mouseout function triggers to popup off when the mouse leaves the area 
+        bounded by the highlight plus popup.
+        
+        This is all unnecessary if popup within highlight or totally outside.
+        
+        """
+        document["popup"+elt_id].bind('mouseleave', mouseout)
     
     document["canvas"].bind("mousemove", mousemove)
 
@@ -67,11 +77,26 @@ def mousemove(ev):
     document["trace3"].text = f"coordinates : {ev.layerX}, {ev.layerY}"
 
 
-def mouseenter(ev):
+def mouseover(ev):
     document["trace1"].text = f'entering {ev.currentTarget.id}'
-    document["t"+ev.currentTarget.id].style['visibility']='visible' # turn popup on 
+    document["popup"+ev.currentTarget.id].style['visibility']='visible' # turn popup on 
 
-def mouseleave(ev):
-    document["trace1"].text = f'leaving {ev.currentTarget.id}'
-    document["t"+ev.currentTarget.id].style['visibility']='hidden' # turn popup off
-
+def mouseout(ev):
+    id=ev.currentTarget.id
+    if id[:5]=="popup":
+        id=id[5:] 
+    canvasXY=cvs[0]
+    X=ev.clientX
+    Y=ev.clientY
+    topleft=highlight[id][0]
+    bottomright=highlight[id][1]
+    document["trace3"].text = f"coordinates : {X}, {Y}"
+    document["trace1"].text = f'leaving {ev.currentTarget.id} ' # {X}, {Y} { bottomright[0]+ canvasXY[0] }'
+    if    X <= topleft[0] + canvasXY[0] \
+       or X >= bottomright[0]+ canvasXY[0]  \
+       or Y <= topleft[1]+ canvasXY[1]  \
+       or Y >= bottomright[1] + canvasXY[1] :
+        document["popup"+id].style['visibility']='hidden' # turn popup off
+    
+    
+    
